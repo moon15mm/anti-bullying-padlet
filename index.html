@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة اللطف والاحترام | معاً ضد التنمر</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&family=Reem+Kufi:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        tajawal: ['Tajawal', 'sans-serif'],
+                        reem: ['"Reem Kufi"', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#9333ea',
+                        secondary: '#f43f5e',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: #f8fafc;
+            background-image: 
+                radial-gradient(#e2e8f0 1.2px, transparent 1.2px),
+                radial-gradient(#cbd5e1 1.2px, #f8fafc 1.2px);
+            background-size: 28px 28px;
+            background-position: 0 0, 14px 14px;
+        }
+
+        /* Padlet Sticky Card Shadows & Animations */
+        .padlet-card {
+            transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .padlet-card:hover {
+            transform: translateY(-6px) rotate(0.4deg);
+            box-shadow: 0 16px 30px -8px rgba(0, 0, 0, 0.12), 0 8px 12px -4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Sticky Tape effect */
+        .tape-effect {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(2px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-left: 2px dashed rgba(200, 200, 200, 0.4);
+            border-right: 2px dashed rgba(200, 200, 200, 0.4);
+            z-index: 10;
+        }
+
+        /* Floating Add Button */
+        .float-btn {
+            animation: pulse-glow 2.5s infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 14px rgba(236, 72, 153, 0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col">
+
+    <!-- Top Banner / Header -->
+    <header class="bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-lg relative overflow-hidden">
+        <!-- Decorative subtle circles -->
+        <div class="absolute -top-16 -right-16 w-56 h-56 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-pink-400/20 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8 relative z-10">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+                <!-- Main Title and Teacher Note -->
+                <div class="text-center lg:text-right flex-1">
+                    <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3.5 py-1 rounded-full text-xs sm:text-sm font-semibold tracking-wide text-pink-100 mb-2.5">
+                        <span>🕊️</span>
+                        <span>اليوم العالمي لمكافحة التنمّر</span>
+                        <span class="w-1.5 h-1.5 rounded-full bg-pink-300"></span>
+                        <span>مبادرة اللطف والاحترام</span>
+                    </div>
+
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-black font-cairo text-white leading-tight mb-3">
+                        لوحة إبداعاتكنّ لنشر اللطف وتعزيز الاحترام 🤍
+                    </h1>
+
+                    <!-- The Message Box from Counselor Afaf Shami -->
+                    <div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 sm:p-5 rounded-2xl max-w-3xl shadow-sm text-sm sm:text-base leading-relaxed text-pink-50 space-y-2 text-right">
+                        <p class="font-bold text-yellow-200 text-base sm:text-lg flex items-center gap-2">
+                            <span>طالباتي الغاليات</span>
+                            <span>🌷</span>
+                        </p>
+                        <p>
+                            أرحّب بمشاركاتكنّ عبر رابط البادلت المرفق، بكلمة هادفة، أو رسمة معبّرة، أو عبارة توعوية عن مكافحة التنمر.
+                        </p>
+                        <p class="font-medium text-white">
+                            لنملأ لوحتنا بأفكاركنّ وإبداعاتكنّ التي تنشر اللطف وتعزّز الاحترام 🤍
+                        </p>
+                        <div class="pt-2 flex items-center justify-between border-t border-white/15 text-xs sm:text-sm font-bold text-pink-100">
+                            <span class="inline-flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                                الموجهة الطلابية: <strong class="text-white underline decoration-pink-300 underline-offset-4">عفاف شامي</strong>
+                            </span>
+                            <span class="text-pink-200 opacity-90 hidden sm:inline">مدرستنا بيئة آمنة وصديقة للجميع 🤝</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button in Header & Stats -->
+                <div class="flex flex-row lg:flex-col items-center gap-3 no-print">
+                    <button onclick="openModal()" class="float-btn inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-purple-950 font-black px-6 py-3.5 rounded-2xl shadow-xl transition transform active:scale-95 text-base sm:text-lg font-cairo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>أضيفي مشاركتكِ الآن 🌷</span>
+                    </button>
+                    
+                    <div class="flex items-center gap-3 text-xs sm:text-sm font-medium bg-black/20 px-4 py-2 rounded-xl backdrop-blur-sm">
+                        <span id="postCountBadge" class="flex items-center gap-1">
+                            <span class="font-bold text-yellow-300" id="totalPostsCount">0</span> مشاركة
+                        </span>
+                        <span class="opacity-40">|</span>
+                        <span class="flex items-center gap-1">
+                            <span class="font-bold text-pink-300" id="totalLikesCount">0</span> إعجاب 💖
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toolbar: Filters, Search, and Tools -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2 w-full no-print">
+        <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-slate-200/80 flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Category Filter Tabs -->
+            <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 text-sm">
+                <button onclick="setFilter('all')" id="filter-all" class="filter-tab px-3.5 py-1.5 rounded-xl font-bold transition bg-purple-600 text-white shadow-sm">
+                    الكل 🌟 (<span id="count-all">0</span>)
+                </button>
+                <button onclick="setFilter('words')" id="filter-words" class="filter-tab px-3.5 py-1.5 rounded-xl font-medium text-slate-600 hover:bg-slate-100 transition">
+                    كلمات هادفة 💬 (<span id="count-words">0</span>)
+                </button>
+                <button onclick="setFilter('drawings')" id="filter-drawings" class="filter-tab px-3.5 py-1.5 rounded-xl font-medium text-slate-600 hover:bg-slate-100 transition">
+                    رسومات وإبداعات 🎨 (<span id="count-drawings">0</span>)
+                </button>
+                <button onclick="setFilter('quotes')" id="filter-quotes" class="filter-tab px-3.5 py-1.5 rounded-xl font-medium text-slate-600 hover:bg-slate-100 transition">
+                    عبارات توعوية 💡 (<span id="count-quotes">0</span>)
+                </button>
+            </div>
+
+            <!-- Search Box & Export Action -->
+            <div class="flex items-center gap-2 w-full md:w-auto">
+                <div class="relative flex-1 md:w-64">
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="ابحثي عن طالبة أو فكرة..." 
+                        class="w-full pl-3 pr-9 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-slate-50 transition">
+                    <svg class="w-4 h-4 text-slate-400 absolute right-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                
+                <button onclick="window.print()" title="طباعة أو حفظ كملف PDF" class="p-2 rounded-xl text-slate-600 hover:text-purple-600 hover:bg-purple-50 border border-slate-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                </button>
+
+                <button onclick="shareBoard()" title="نسخ رابط اللوحة" class="p-2 rounded-xl text-slate-600 hover:text-pink-600 hover:bg-pink-50 border border-slate-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Padlet Grid -->
+    <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
+        <!-- Empty state placeholder -->
+        <div id="emptyState" class="hidden text-center py-16 bg-white/60 backdrop-blur rounded-3xl border-2 border-dashed border-slate-300">
+            <span class="text-6xl block mb-3">🎨</span>
+            <h3 class="text-xl font-bold text-slate-700 font-cairo">لا توجد مشاركات مطابقة للبحث</h3>
+            <p class="text-slate-500 mt-1">كوني أول من يضيف لمسة لطيفة في هذه الخانة!</p>
+            <button onclick="openModal()" class="mt-4 px-5 py-2.5 bg-purple-600 text-white rounded-xl font-bold shadow hover:bg-purple-700 transition">
+                أضيفي مشاركة جديدة ✨
+            </button>
+        </div>
+
+        <!-- Cards Masonry / Grid Container -->
+        <div id="cardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 items-start">
+            <!-- Cards will be dynamically injected here -->
+        </div>
+    </main>
+
+    <!-- Floating Quick Add Button for Mobile -->
+    <div class="fixed bottom-6 left-6 z-30 sm:hidden no-print">
+        <button onclick="openModal()" class="w-14 h-14 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-full shadow-2xl flex items-center justify-center font-bold text-2xl active:scale-95 transition transform">
+            ➕
+        </button>
+    </div>
+
+    <!-- Modal: Add New Post -->
+    <div id="postModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto no-print">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl border border-slate-100 transform transition-all relative my-8">
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-5 left-5 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+                ✕
+            </button>
+
+            <!-- Modal Header -->
+            <div class="text-right mb-5">
+                <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">مشاركتكِ تصنع فارقاً 🌸</span>
+                <h3 class="text-2xl font-black font-cairo text-slate-800 mt-2">إضافة مشاركة جديدة</h3>
+                <p class="text-xs text-slate-500 mt-0.5">شاركي بكلمة هادفة، أو رسمة معبرة، أو عبارة توعوية</p>
+            </div>
+
+            <!-- Form -->
+            <form id="newPostForm" onsubmit="submitPost(event)" class="space-y-4 text-right">
+                <!-- Name and Grade -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">اسم الطالبة *</label>
+                        <input type="text" id="authorName" required placeholder="مثال: سارة محمد" 
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-slate-50">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">الصف / المرحلة</label>
+                        <input type="text" id="authorGrade" placeholder="مثال: أول متوسط / 2" 
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-slate-50">
+                    </div>
+                </div>
+
+                <!-- Post Category -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">نوع المشاركة *</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="flex flex-col items-center justify-center p-2.5 border rounded-xl cursor-pointer transition hover:bg-pink-50 text-center select-none" id="cat-label-words">
+                            <input type="radio" name="postCategory" value="words" checked onchange="updateCategoryUI()" class="hidden">
+                            <span class="text-lg">💬</span>
+                            <span class="text-xs font-bold mt-1 text-slate-700">كلمة هادفة</span>
+                        </label>
+                        <label class="flex flex-col items-center justify-center p-2.5 border rounded-xl cursor-pointer transition hover:bg-pink-50 text-center select-none" id="cat-label-drawings">
+                            <input type="radio" name="postCategory" value="drawings" onchange="updateCategoryUI()" class="hidden">
+                            <span class="text-lg">🎨</span>
+                            <span class="text-xs font-bold mt-1 text-slate-700">رسمة معبّرة</span>
+                        </label>
+                        <label class="flex flex-col items-center justify-center p-2.5 border rounded-xl cursor-pointer transition hover:bg-pink-50 text-center select-none" id="cat-label-quotes">
+                            <input type="radio" name="postCategory" value="quotes" onchange="updateCategoryUI()" class="hidden">
+                            <span class="text-lg">💡</span>
+                            <span class="text-xs font-bold mt-1 text-slate-700">عبارة توعوية</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Post Title / Headline -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">عنوان الفكرة (اختياري)</label>
+                    <input type="text" id="postTitle" placeholder="مثال: الكلمة الطيبة صدقة" 
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-slate-50">
+                </div>
+
+                <!-- Text Content -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">نص المشاركة *</label>
+                    <textarea id="postContent" rows="3" required placeholder="اكتبي ما يجول في خاطركِ لنشر اللطف والتكاتف ومكافحة التنمر..." 
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-slate-50"></textarea>
+                </div>
+
+                <!-- Image Upload (especially for drawings) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">إرفاق صورة أو رسمة (اختياري)</label>
+                    <div class="relative border-2 border-dashed border-slate-200 hover:border-purple-300 rounded-xl p-3 text-center transition bg-slate-50">
+                        <input type="file" id="imageInput" accept="image/*" onchange="handleImagePreview(event)" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                        <div id="imagePlaceholder" class="flex flex-col items-center pointer-events-none">
+                            <span class="text-xl">🖼️</span>
+                            <span class="text-xs text-slate-500 mt-1 font-medium">انقري لرفع رسمتكِ أو تصميمكِ</span>
+                        </div>
+                        <div id="imagePreviewContainer" class="hidden relative">
+                            <img id="imagePreview" src="" alt="معاينة" class="max-h-36 mx-auto rounded-lg shadow-sm object-contain">
+                            <button type="button" onclick="clearImage(event)" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">✕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color Palette -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">لون بطاقة البادلت</label>
+                    <div class="flex items-center gap-2.5 justify-start">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="cardColor" value="bg-pink-100/90 border-pink-200" checked class="hidden peer">
+                            <span class="w-8 h-8 rounded-full bg-pink-200 border-2 border-transparent peer-checked:border-pink-600 peer-checked:scale-110 transition flex items-center justify-center text-xs">🌸</span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="cardColor" value="bg-amber-100/90 border-amber-200" class="hidden peer">
+                            <span class="w-8 h-8 rounded-full bg-amber-200 border-2 border-transparent peer-checked:border-amber-600 peer-checked:scale-110 transition flex items-center justify-center text-xs">☀️</span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="cardColor" value="bg-emerald-100/90 border-emerald-200" class="hidden peer">
+                            <span class="w-8 h-8 rounded-full bg-emerald-200 border-2 border-transparent peer-checked:border-emerald-600 peer-checked:scale-110 transition flex items-center justify-center text-xs">🌱</span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="cardColor" value="bg-sky-100/90 border-sky-200" class="hidden peer">
+                            <span class="w-8 h-8 rounded-full bg-sky-200 border-2 border-transparent peer-checked:border-sky-600 peer-checked:scale-110 transition flex items-center justify-center text-xs">💧</span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="cardColor" value="bg-purple-100/90 border-purple-200" class="hidden peer">
+                            <span class="w-8 h-8 rounded-full bg-purple-200 border-2 border-transparent peer-checked:border-purple-600 peer-checked:scale-110 transition flex items-center justify-center text-xs">💜</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg transition font-cairo text-base flex items-center justify-center gap-2">
+                        <span>نشر المشاركة على الحائط</span>
+                        <span>✨</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div id="imageLightbox" onclick="closeLightbox()" class="fixed inset-0 z-50 bg-black/80 hidden items-center justify-center p-4 no-print cursor-pointer">
+        <div class="max-w-3xl max-h-[85vh] relative" onclick="event.stopPropagation()">
+            <img id="lightboxImg" src="" alt="عرض الرسمة" class="max-h-[80vh] w-auto rounded-2xl shadow-2xl object-contain mx-auto">
+            <p id="lightboxCaption" class="text-white text-center mt-3 font-bold text-sm"></p>
+            <button onclick="closeLightbox()" class="absolute -top-4 -right-4 bg-white text-slate-800 rounded-full w-8 h-8 flex items-center justify-center font-black shadow-lg">✕</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-auto py-6 text-center text-xs sm:text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span>🌷</span>
+                <span class="font-bold text-slate-700">اليوم العالمي لمكافحة التنمر</span>
+                <span>— إشراف الموجهة الطلابية: <strong class="text-purple-700">عفاف شامي</strong></span>
+            </div>
+            <p class="text-slate-400">معاً لصناعة بيئة تعليمية تسودها المودة، الاحترام، والكلمة الطيبة 🤍</p>
+        </div>
+    </footer>
+
+    <!-- Sound & Logic Script -->
+    <script>
+        // Initial pre-loaded inspiring posts for the Counselor and sample students
+        const DEFAULT_POSTS = [
+            {
+                id: 'welcome-post',
+                author: 'أ. عفاف شامي',
+                grade: 'الموجهة الطلابية',
+                category: 'quotes',
+                title: 'رسالتي لكنّ طالباتي الغاليات 🌷',
+                content: 'أرحّب بمشاركاتكنّ عبر رابط البادلت المرفق، بكلمة هادفة، أو رسمة معبّرة، أو عبارة توعوية عن مكافحة التنمر. لنملأ لوحتنا بأفكاركنّ وإبداعاتكنّ التي تنشر اللطف وتعزّز الاحترام 🤍',
+                color: 'bg-purple-100/90 border-purple-300',
+                likes: 38,
+                isPinned: true,
+                date: 'المشرفة العامة',
+                image: null
+            },
+            {
+                id: 'post-1',
+                author: 'ريناد عبد العزيز',
+                grade: 'ثالث متوسط / 1',
+                category: 'quotes',
+                title: 'الكلمة الطيبة تبني قلباً',
+                content: 'التنمر يترك أثراً لا يُمحى بسهولة، لكن ابتسامتك وكلمتك الطيبة قادرة على إنقاذ يوم كامل لشخص آخر. لنكن مصدر أمان لزميلاتنا 🤝✨',
+                color: 'bg-pink-100/90 border-pink-200',
+                likes: 19,
+                isPinned: false,
+                date: 'منذ ساعتين',
+                image: null
+            },
+            {
+                id: 'post-2',
+                author: 'جود العتيبي',
+                grade: 'ثاني متوسط / 3',
+                category: 'drawings',
+                title: 'معاً نتكاتف ضد التنمر 🎨',
+                content: 'رسمت هذه اللوحة لأعبّر عن أن اختلافنا يجعلنا أجمل، والتنمر ليس قوة بل علامة ضعف.',
+                color: 'bg-sky-100/90 border-sky-200',
+                likes: 27,
+                isPinned: false,
+                date: 'منذ 3 ساعات',
+                image: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=600&auto=format&fit=crop&q=80'
+            },
+            {
+                id: 'post-3',
+                author: 'ليان فهد',
+                grade: 'أول ثانوي / 2',
+                category: 'words',
+                title: 'كن بطلاً ولا تكن متفرجاً',
+                content: 'إذا رأيتِ موقف تنمر في ساحة المدرسة أو في الممر، لا تصمتي.. قفي مع زميلتكِ أو أبلغي معلمتكِ وموجهتكِ الطلابية. صوتكِ شجاعة! 🕊️',
+                color: 'bg-emerald-100/90 border-emerald-200',
+                likes: 15,
+                isPinned: false,
+                date: 'منذ 4 ساعات',
+                image: null
+            },
+            {
+                id: 'post-4',
+                author: 'سديم الشمري',
+                grade: 'سادس ابتدائي',
+                category: 'quotes',
+                title: 'اللطف مجاني.. انشروه!',
+                content: 'ما أجمل أن نلتقي كل صباح بابتسامة ناصعة وكلمة سلام، شكراً للأستاذة عفاف على هذه المساحة الجميلة التي تجمع قلوبنا 🤍',
+                color: 'bg-amber-100/90 border-amber-200',
+                likes: 22,
+                isPinned: false,
+                date: 'اليوم',
+                image: null
+            }
+        ];
+
+        // State management with LocalStorage
+        let posts = [];
+        let currentFilter = 'all';
+        let searchQuery = '';
+        let uploadedImageDataUrl = null;
+
+        // Initialize
+        function init() {
+            const saved = localStorage.getItem('anti_bullying_padlet_posts');
+            if (saved) {
+                try {
+                    posts = JSON.parse(saved);
+                } catch(e) {
+                    posts = DEFAULT_POSTS;
+                }
+            } else {
+                posts = DEFAULT_POSTS;
+                savePosts();
+            }
+            updateCategoryUI();
+            renderPosts();
+        }
+
+        function savePosts() {
+            localStorage.setItem('anti_bullying_padlet_posts', JSON.stringify(posts));
+        }
+
+        // Web Audio gentle beep/pop sound
+        function playPopSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {
+                // Audio not allowed or unsupported
+            }
+        }
+
+        // Render Cards
+        function renderPosts() {
+            const container = document.getElementById('cardsGrid');
+            const emptyState = document.getElementById('emptyState');
+
+            // Filter logic
+            const filtered = posts.filter(post => {
+                const matchesCategory = currentFilter === 'all' || post.category === currentFilter;
+                const matchesSearch = !searchQuery || 
+                    (post.author && post.author.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                    (post.title && post.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                    (post.content && post.content.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                    (post.grade && post.grade.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matchesCategory && matchesSearch;
+            });
+
+            // Update stats
+            document.getElementById('totalPostsCount').textContent = posts.length;
+            const totalLikes = posts.reduce((sum, p) => sum + (p.likes || 0), 0);
+            document.getElementById('totalLikesCount').textContent = totalLikes;
+
+            // Update filter badges counts
+            document.getElementById('count-all').textContent = posts.length;
+            document.getElementById('count-words').textContent = posts.filter(p => p.category === 'words').length;
+            document.getElementById('count-drawings').textContent = posts.filter(p => p.category === 'drawings').length;
+            document.getElementById('count-quotes').textContent = posts.filter(p => p.category === 'quotes').length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            // Build cards HTML
+            container.innerHTML = filtered.map(post => {
+                const categoryBadge = getCategoryBadge(post.category);
+                const isPinned = post.isPinned ? `
+                    <div class="absolute -top-3.5 right-4 bg-purple-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-1 z-20">
+                        <span>📌</span> مثبتة من الموجهة
+                    </div>` : '';
+
+                const imageHtml = post.image ? `
+                    <div class="mb-3 overflow-hidden rounded-xl cursor-pointer group/img" onclick="openLightbox('${post.image}', '${escapeHtml(post.title || post.author)}')">
+                        <img src="${post.image}" alt="${escapeHtml(post.title || '')}" class="w-full h-44 object-cover rounded-xl transition duration-300 group-hover/img:scale-105">
+                        <span class="block text-[11px] text-slate-500 text-center mt-1">اضغطي لتكبير الصورة 🔍</span>
+                    </div>` : '';
+
+                return `
+                <div class="padlet-card ${post.color || 'bg-pink-100/90 border-pink-200'} border rounded-3xl p-5 shadow-sm flex flex-col justify-between relative">
+                    <div class="tape-effect"></div>
+                    ${isPinned}
+                    
+                    <div>
+                        <!-- Header info -->
+                        <div class="flex items-start justify-between gap-2 mb-3 pt-1">
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-base font-cairo flex items-center gap-1.5">
+                                    <span>${escapeHtml(post.author)}</span>
+                                    ${post.isPinned ? '<span>👑</span>' : ''}
+                                </h4>
+                                ${post.grade ? `<span class="text-[11px] text-slate-600 font-medium">${escapeHtml(post.grade)}</span>` : ''}
+                            </div>
+                            ${categoryBadge}
+                        </div>
+
+                        ${imageHtml}
+
+                        ${post.title ? `<h5 class="font-extrabold text-slate-800 text-sm mb-1.5 font-cairo leading-snug">${escapeHtml(post.title)}</h5>` : ''}
+                        
+                        <p class="text-xs sm:text-sm text-slate-700 leading-relaxed font-normal whitespace-pre-line mb-4">
+                            ${escapeHtml(post.content)}
+                        </p>
+                    </div>
+
+                    <!-- Card Footer: Likes, Date, Delete -->
+                    <div class="pt-3 border-t border-black/5 flex items-center justify-between text-xs text-slate-500 mt-2">
+                        <div class="flex items-center gap-2">
+                            <button onclick="likePost('${post.id}')" class="like-btn flex items-center gap-1.5 bg-white/80 hover:bg-white text-rose-600 font-bold px-3 py-1.5 rounded-xl shadow-xs transition active:scale-125 border border-rose-100">
+                                <span>💖</span>
+                                <span id="like-count-${post.id}">${post.likes || 0}</span>
+                            </button>
+                            <span class="text-[11px] text-slate-400">${post.date || ''}</span>
+                        </div>
+
+                        ${!post.isPinned ? `
+                            <button onclick="deletePost('${post.id}')" title="حذف المشاركة" class="text-slate-400 hover:text-red-500 transition p-1 hover:bg-white/50 rounded-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function getCategoryBadge(cat) {
+            switch(cat) {
+                case 'words':
+                    return '<span class="bg-blue-500/10 text-blue-700 border border-blue-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">💬 كلمة هادفة</span>';
+                case 'drawings':
+                    return '<span class="bg-amber-500/10 text-amber-800 border border-amber-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">🎨 رسمة معبّرة</span>';
+                case 'quotes':
+                default:
+                    return '<span class="bg-purple-500/10 text-purple-700 border border-purple-200 text-[11px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">💡 عبارة توعوية</span>';
+            }
+        }
+
+        // Like handler with animation and confetti
+        function likePost(id) {
+            const post = posts.find(p => p.id === id);
+            if (post) {
+                post.likes = (post.likes || 0) + 1;
+                savePosts();
+                renderPosts();
+                playPopSound();
+            }
+        }
+
+        // Delete post
+        function deletePost(id) {
+            if (confirm('هل أنتِ متأكدة من رغبتكِ في حذف هذه المشاركة؟')) {
+                posts = posts.filter(p => p.id !== id);
+                savePosts();
+                renderPosts();
+            }
+        }
+
+        // Filter and Search
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(el => {
+                el.classList.remove('bg-purple-600', 'text-white', 'shadow-sm');
+                el.classList.add('text-slate-600');
+            });
+            const activeTab = document.getElementById(`filter-${filter}`);
+            if (activeTab) {
+                activeTab.classList.add('bg-purple-600', 'text-white', 'shadow-sm');
+                activeTab.classList.remove('text-slate-600');
+            }
+            renderPosts();
+        }
+
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value.trim();
+            renderPosts();
+        }
+
+        // Modal Controls
+        function openModal() {
+            document.getElementById('postModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('postModal').classList.add('hidden');
+            document.getElementById('newPostForm').reset();
+            clearImage();
+            updateCategoryUI();
+        }
+
+        function updateCategoryUI() {
+            const selected = document.querySelector('input[name="postCategory"]:checked')?.value || 'words';
+            ['words', 'drawings', 'quotes'].forEach(cat => {
+                const label = document.getElementById(`cat-label-${cat}`);
+                if (label) {
+                    if (cat === selected) {
+                        label.classList.add('border-purple-500', 'bg-purple-50/70', 'ring-2', 'ring-purple-200');
+                        label.classList.remove('border-slate-200');
+                    } else {
+                        label.classList.remove('border-purple-500', 'bg-purple-50/70', 'ring-2', 'ring-purple-200');
+                        label.classList.add('border-slate-200');
+                    }
+                }
+            });
+        }
+
+        // Image Handling
+        function handleImagePreview(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImageDataUrl = e.target.result;
+                    document.getElementById('imagePreview').src = uploadedImageDataUrl;
+                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                    document.getElementById('imagePlaceholder').classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearImage(event) {
+            if (event) event.stopPropagation();
+            uploadedImageDataUrl = null;
+            document.getElementById('imageInput').value = '';
+            document.getElementById('imagePreview').src = '';
+            document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('imagePlaceholder').classList.remove('hidden');
+        }
+
+        // Submit New Post
+        function submitPost(e) {
+            e.preventDefault();
+
+            const author = document.getElementById('authorName').value.trim();
+            const grade = document.getElementById('authorGrade').value.trim();
+            const category = document.querySelector('input[name="postCategory"]:checked').value;
+            const title = document.getElementById('postTitle').value.trim();
+            const content = document.getElementById('postContent').value.trim();
+            const color = document.querySelector('input[name="cardColor"]:checked').value;
+
+            if (!author || !content) {
+                alert('فضلاً أدخلي اسمكِ ونص المشاركة.');
+                return;
+            }
+
+            const newPost = {
+                id: 'post-' + Date.now(),
+                author,
+                grade,
+                category,
+                title,
+                content,
+                color,
+                likes: 1,
+                isPinned: false,
+                date: 'الآن',
+                image: uploadedImageDataUrl || null
+            };
+
+            // Prepend new post (just after pinned ones)
+            posts.splice(1, 0, newPost);
+            savePosts();
+            renderPosts();
+            closeModal();
+
+            // Fire Celebration Confetti
+            confetti({
+                particleCount: 80,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+            playPopSound();
+        }
+
+        // Lightbox for drawings
+        function openLightbox(src, caption) {
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('lightboxCaption').textContent = caption || '';
+            document.getElementById('imageLightbox').classList.remove('hidden');
+            document.getElementById('imageLightbox').classList.add('flex');
+        }
+
+        function closeLightbox() {
+            document.getElementById('imageLightbox').classList.add('hidden');
+            document.getElementById('imageLightbox').classList.remove('flex');
+        }
+
+        // Share button
+        function shareBoard() {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('تم نسخ رابط لوحة البادلت بنجاح! يمكنكِ الآن مشاركته مع طالباتكِ 🌷');
+                });
+            } else {
+                alert('رابط الصفحة: ' + window.location.href);
+            }
+        }
+
+        // Utility: XSS prevention
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.toString().replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
