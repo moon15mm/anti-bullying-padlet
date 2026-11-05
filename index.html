@@ -352,8 +352,8 @@
 
                 <!-- Text Content -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">نص المشاركة *</label>
-                    <textarea id="postContent" rows="3" required placeholder="اكتبي ما يجول في خاطركِ لنشر اللطف والتكاتف ومكافحة التنمر..." 
+                    <label class="block text-xs font-bold text-slate-700 mb-1">نص المشاركة أو فكرتكِ (اختياري إذا أرفقتِ رسمة)</label>
+                    <textarea id="postContent" rows="3" placeholder="اكتبي ما يجول في خاطركِ لنشر اللطف والتكاتف ومكافحة التنمر..." 
                         class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-slate-50"></textarea>
                 </div>
 
@@ -402,7 +402,7 @@
 
                 <!-- Submit Button -->
                 <div class="pt-2">
-                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg transition font-cairo text-base flex items-center justify-center gap-2">
+                    <button type="submit" id="submitPostBtn" class="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-xl shadow-lg transition font-cairo text-base flex items-center justify-center gap-2">
                         <span>نشر المشاركة على الحائط</span>
                         <span>✨</span>
                     </button>
@@ -733,7 +733,11 @@
         }
 
         function saveToLocalStorage() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+            } catch (err) {
+                console.warn('LocalStorage quota reached, cloud server handles persistence:', err);
+            }
         }
 
         // Live Realtime Poller (syncs changes made by other students/devices)
@@ -1019,19 +1023,55 @@
             });
         }
 
-        // Image Handling
+        // Image Handling with Automatic Mobile-friendly Compression
         function handleImagePreview(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    uploadedImageDataUrl = e.target.result;
-                    document.getElementById('imagePreview').src = uploadedImageDataUrl;
-                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
-                    document.getElementById('imagePlaceholder').classList.add('hidden');
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const MAX_SIZE = 960;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_SIZE) {
+                                height = Math.round((height * MAX_SIZE) / width);
+                                width = MAX_SIZE;
+                            }
+                        } else {
+                            if (height > MAX_SIZE) {
+                                width = Math.round((width * MAX_SIZE) / height);
+                                height = MAX_SIZE;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Compress to lightweight high-quality Web JPEG (~70KB)
+                        uploadedImageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+                        document.getElementById('imagePreview').src = uploadedImageDataUrl;
+                        document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                        document.getElementById('imagePlaceholder').classList.add('hidden');
+                    } catch (err) {
+                        // Fallback in case canvas fails
+                        uploadedImageDataUrl = e.target.result;
+                        document.getElementById('imagePreview').src = uploadedImageDataUrl;
+                        document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                        document.getElementById('imagePlaceholder').classList.add('hidden');
+                    }
                 };
-                reader.readAsDataURL(file);
-            }
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         function clearImage(event) {
@@ -1044,28 +1084,44 @@
         }
 
         // Submit New Post
-        function submitPost(e) {
+        async function submitPost(e) {
             e.preventDefault();
 
             const author = document.getElementById('authorName').value.trim();
             const grade = document.getElementById('authorGrade').value.trim();
-            const category = document.querySelector('input[name="postCategory"]:checked').value;
+            const category = document.querySelector('input[name="postCategory"]:checked')?.value || 'words';
             const title = document.getElementById('postTitle').value.trim();
-            const content = document.getElementById('postContent').value.trim();
-            const color = document.querySelector('input[name="cardColor"]:checked').value;
+            let content = document.getElementById('postContent').value.trim();
+            const color = document.querySelector('input[name="cardColor"]:checked')?.value || 'bg-pink-100/90 border-pink-200';
 
-            if (!author || !content) {
-                alert('فضلاً أدخلي اسمكِ ونص المشاركة.');
+            if (!author) {
+                alert('فضلاً أدخلي اسمكِ أو اسم الفريق المشارك 🌷');
                 return;
+            }
+
+            if (!content && !uploadedImageDataUrl) {
+                alert('فضلاً اكتبي كلمة هادفة أو أرفقي رسمة للمشاركة 🎨');
+                return;
+            }
+
+            if (!content && uploadedImageDataUrl) {
+                content = 'مشاركتي الفنية في اليوم العالمي لمكافحة التنمر 🎨✨';
+            }
+
+            const submitBtn = document.getElementById('submitPostBtn');
+            const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span>جارٍ النشر والمزامنة... ⏳</span>';
             }
 
             const newPost = {
                 id: 'post-' + Date.now(),
                 timestamp: Date.now(),
                 author,
-                grade,
+                grade: grade || 'طالبة',
                 category,
-                title,
+                title: title || (category === 'drawings' ? 'إبداع فني 🎨' : 'مشاركة هادفة 💬'),
                 content,
                 color,
                 likes: 1,
@@ -1081,7 +1137,16 @@
             closeModal();
 
             // Sync to cloud server
-            syncPostToCloud(newPost);
+            try {
+                await syncPostToCloud(newPost);
+            } catch (err) {
+                console.error('Cloud sync error:', err);
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+            }
 
             // Fire Celebration Confetti
             confetti({
@@ -1090,6 +1155,8 @@
                 origin: { y: 0.6 }
             });
             playPopSound();
+
+            alert('تم نشر مشاركتكِ بنجاح على لوحة المدرسة! شكراً لمبادرتكِ ولطفكِ 🌷🤍');
         }
 
         // Lightbox for drawings
