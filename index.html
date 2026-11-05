@@ -249,6 +249,12 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"></path>
                     </svg>
                 </button>
+
+                <!-- Cloud Server Sync Button -->
+                <button onclick="openCloudModal()" id="cloudStatusBtn" title="إعدادات الربط السحابي (Firebase)" class="px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50 transition flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                    <span id="cloudStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="cloudStatusText" class="hidden sm:inline">سيرفر المشاركات</span>
+                </button>
             </div>
         </div>
     </section>
@@ -408,6 +414,50 @@
         </div>
     </div>
 
+    <!-- Cloud Server Setup Modal -->
+    <div id="cloudModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto no-print">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-100 text-right relative my-8">
+            <button onclick="closeCloudModal()" class="absolute top-5 left-5 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition">
+                ✕
+            </button>
+
+            <div class="mb-4">
+                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">سيرفر المشاركات المباشر ☁️</span>
+                <h3 class="text-xl font-black font-cairo text-slate-800 mt-2">ربط السيرفر السحابي (Firebase)</h3>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                    لحفظ ومزامنة كافة مشاركات وإعجابات الطالبات عبر مختلف الجوالات والأجهزة لحظياً.
+                </p>
+            </div>
+
+            <div class="space-y-4 text-xs text-slate-600 leading-relaxed">
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                    <p class="font-bold text-slate-800 mb-1">خطوات سريعة لإنشاء السيرفر مجاناً:</p>
+                    <ol class="list-decimal list-inside space-y-1 text-slate-600">
+                        <li>ادخلي إلى <a href="https://console.firebase.google.com" target="_blank" class="text-purple-600 underline font-bold">Firebase Console</a> بحساب Google.</li>
+                        <li>أنشئي مشروعاً جديداً (مثلاً: <code class="bg-slate-200 px-1 rounded">darb-padlet</code>).</li>
+                        <li>من القائمة: اختاري <strong>Realtime Database</strong> ثم <strong>Create Database</strong> في وضع الاختبار (Test Mode).</li>
+                        <li>انسخي الرابط وضَعيه في الخانة أدناه.</li>
+                    </ol>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">رابط قاعدة بيانات Firebase Database URL</label>
+                    <input type="url" id="firebaseUrlInput" placeholder="https://your-app-default-rtdb.firebaseio.com" 
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-slate-50 text-left dir-ltr">
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <button type="button" onclick="saveCloudConfig()" class="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow transition text-sm">
+                        حفظ وربط السيرفر الآن 🚀
+                    </button>
+                    <button type="button" onclick="disconnectCloud()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold rounded-xl transition text-xs">
+                        فصل
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 mt-auto py-6 text-center text-xs sm:text-sm text-slate-500">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -441,21 +491,140 @@
             }
         ];
 
-        // State management with LocalStorage
+        // Global State & Cloud Configuration
+        // Note: You can paste your Firebase Realtime DB URL here or via the cloud settings button
+        let FIREBASE_URL = localStorage.getItem('padlet_firebase_url') || '';
         let posts = [];
         let currentFilter = 'all';
         let searchQuery = '';
         let uploadedImageDataUrl = null;
+        let isSyncing = false;
 
         const STORAGE_KEY = 'anti_bullying_padlet_posts_v6';
 
         // Initialize
-        function init() {
+        async function init() {
+            initCloudUI();
+            await loadAllPosts();
+            updateCategoryUI();
+            renderPosts();
+
+            // Start live real-time sync with server
+            if (FIREBASE_URL) {
+                startRealtimeSync();
+            }
+        }
+
+        // Cloud Server UI helpers
+        function initCloudUI() {
+            const input = document.getElementById('firebaseUrlInput');
+            if (input && FIREBASE_URL) input.value = FIREBASE_URL;
+
+            if (FIREBASE_URL) {
+                setCloudDot('green', 'السيرفر متصل 🟢');
+            } else {
+                setCloudDot('amber', 'سيرفر المشاركات ☁️');
+            }
+        }
+
+        function setCloudDot(color, label) {
+            const dot = document.getElementById('cloudStatusDot');
+            const text = document.getElementById('cloudStatusText');
+            if (!dot || !text) return;
+
+            dot.className = 'w-2.5 h-2.5 rounded-full';
+            if (color === 'green') {
+                dot.classList.add('bg-emerald-500');
+            } else if (color === 'red') {
+                dot.classList.add('bg-rose-500');
+            } else {
+                dot.classList.add('bg-amber-400', 'animate-pulse');
+            }
+            if (label) text.textContent = label;
+        }
+
+        function openCloudModal() {
+            document.getElementById('cloudModal').classList.remove('hidden');
+        }
+
+        function closeCloudModal() {
+            document.getElementById('cloudModal').classList.add('hidden');
+        }
+
+        async function saveCloudConfig() {
+            let url = document.getElementById('firebaseUrlInput').value.trim();
+            if (!url) {
+                alert('فضلاً أدخلي رابط Firebase Database URL.');
+                return;
+            }
+            if (!url.startsWith('http')) {
+                url = 'https://' + url;
+            }
+            url = url.replace(/\/$/, '');
+            FIREBASE_URL = url;
+            localStorage.setItem('padlet_firebase_url', FIREBASE_URL);
+            closeCloudModal();
+            setCloudDot('amber', 'جارٍ الاتصال...');
+
+            // Test and load
+            await loadAllPosts();
+            startRealtimeSync();
+            alert('تم حفظ رابط السيرفر السحابي بنجاح! سيتم الآن مزامنة المشاركات بين كافة الأجهزة 🚀');
+        }
+
+        function disconnectCloud() {
+            FIREBASE_URL = '';
+            localStorage.removeItem('padlet_firebase_url');
+            document.getElementById('firebaseUrlInput').value = '';
+            setCloudDot('amber', 'سيرفر المشاركات ☁️');
+            closeCloudModal();
+            loadFromLocalStorage();
+            renderPosts();
+            alert('تم إلغاء ربط السيرفر السحابي، اللوحة تعمل الآن في الوضع المحلي.');
+        }
+
+        // Data Loading
+        async function loadAllPosts() {
+            if (FIREBASE_URL) {
+                try {
+                    const res = await fetch(`${FIREBASE_URL}/posts.json`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && typeof data === 'object') {
+                            const cloudPosts = Object.values(data);
+                            // Ensure welcome post is present
+                            const wIndex = cloudPosts.findIndex(p => p.id === 'welcome-post');
+                            if (wIndex !== -1) {
+                                cloudPosts[wIndex] = DEFAULT_POSTS[0];
+                            } else {
+                                cloudPosts.unshift(DEFAULT_POSTS[0]);
+                            }
+                            posts = cloudPosts;
+                        } else {
+                            // Seed welcome post to new database
+                            posts = [...DEFAULT_POSTS];
+                            await syncPostToCloud(DEFAULT_POSTS[0]);
+                        }
+                        setCloudDot('green', 'السيرفر متصل 🟢');
+                        saveToLocalStorage();
+                        renderPosts();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Could not load from Firebase, falling back to local:', e);
+                    setCloudDot('red', 'خطأ في السيرفر 🔴');
+                }
+            }
+
+            // Fallback
+            loadFromLocalStorage();
+        }
+
+        function loadFromLocalStorage() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
                     posts = JSON.parse(saved);
-                    // Ensure pinned post has updated school and leadership details
                     const welcomeIndex = posts.findIndex(p => p.id === 'welcome-post');
                     if (welcomeIndex !== -1) {
                         posts[welcomeIndex] = DEFAULT_POSTS[0];
@@ -463,18 +632,94 @@
                         posts.unshift(DEFAULT_POSTS[0]);
                     }
                 } catch(e) {
-                    posts = DEFAULT_POSTS;
+                    posts = [...DEFAULT_POSTS];
                 }
             } else {
                 posts = [...DEFAULT_POSTS];
             }
-            savePosts();
-            updateCategoryUI();
-            renderPosts();
+            saveToLocalStorage();
         }
 
-        function savePosts() {
+        function saveToLocalStorage() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+        }
+
+        // Live Realtime Poller (syncs changes made by other students/devices)
+        let syncInterval = null;
+        function startRealtimeSync() {
+            if (syncInterval) clearInterval(syncInterval);
+            if (!FIREBASE_URL) return;
+
+            syncInterval = setInterval(async () => {
+                if (isSyncing || !FIREBASE_URL) return;
+                try {
+                    isSyncing = true;
+                    const res = await fetch(`${FIREBASE_URL}/posts.json`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && typeof data === 'object') {
+                            const cloudPosts = Object.values(data);
+                            const wIndex = cloudPosts.findIndex(p => p.id === 'welcome-post');
+                            if (wIndex !== -1) cloudPosts[wIndex] = DEFAULT_POSTS[0];
+                            else cloudPosts.unshift(DEFAULT_POSTS[0]);
+
+                            // Sort: pinned first, then newest
+                            cloudPosts.sort((a, b) => {
+                                if (a.isPinned) return -1;
+                                if (b.isPinned) return 1;
+                                return (b.timestamp || 0) - (a.timestamp || 0);
+                            });
+
+                            if (JSON.stringify(cloudPosts) !== JSON.stringify(posts)) {
+                                posts = cloudPosts;
+                                saveToLocalStorage();
+                                renderPosts();
+                            }
+                        }
+                    }
+                } catch(e) {
+                    // silent sync fail
+                } finally {
+                    isSyncing = false;
+                }
+            }, 3500); // Check every 3.5 seconds
+        }
+
+        async function syncPostToCloud(post) {
+            if (!FIREBASE_URL) return;
+            try {
+                await fetch(`${FIREBASE_URL}/posts/${post.id}.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(post)
+                });
+            } catch (e) {
+                console.error('Error syncing post to cloud:', e);
+            }
+        }
+
+        async function deletePostFromCloud(id) {
+            if (!FIREBASE_URL) return;
+            try {
+                await fetch(`${FIREBASE_URL}/posts/${id}.json`, {
+                    method: 'DELETE'
+                });
+            } catch (e) {
+                console.error('Error deleting from cloud:', e);
+            }
+        }
+
+        async function updateLikesInCloud(id, newLikes) {
+            if (!FIREBASE_URL) return;
+            try {
+                await fetch(`${FIREBASE_URL}/posts/${id}/likes.json`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newLikes)
+                });
+            } catch (e) {
+                console.error('Error updating likes in cloud:', e);
+            }
         }
 
         // Web Audio gentle beep/pop sound
@@ -612,18 +857,20 @@
             const post = posts.find(p => p.id === id);
             if (post) {
                 post.likes = (post.likes || 0) + 1;
-                savePosts();
+                saveToLocalStorage();
                 renderPosts();
                 playPopSound();
+                updateLikesInCloud(id, post.likes);
             }
         }
 
         // Delete post
         function deletePost(id) {
-            if (confirm('هل أنتِ متأكدة من رغبتكِ في حذف هذه المشاركة؟')) {
+            if (confirm('هل أنتِ متأكدة من رغبتكِ في حذف هذه المشاركة نهائياً؟')) {
                 posts = posts.filter(p => p.id !== id);
-                savePosts();
+                saveToLocalStorage();
                 renderPosts();
+                deletePostFromCloud(id);
             }
         }
 
@@ -717,6 +964,7 @@
 
             const newPost = {
                 id: 'post-' + Date.now(),
+                timestamp: Date.now(),
                 author,
                 grade,
                 category,
@@ -731,9 +979,12 @@
 
             // Prepend new post (just after pinned ones)
             posts.splice(1, 0, newPost);
-            savePosts();
+            saveToLocalStorage();
             renderPosts();
             closeModal();
+
+            // Sync to cloud server
+            syncPostToCloud(newPost);
 
             // Fire Celebration Confetti
             confetti({
