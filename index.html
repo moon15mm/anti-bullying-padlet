@@ -492,15 +492,15 @@
         ];
 
         // Global State & Cloud Configuration
-        // Note: You can paste your Firebase Realtime DB URL here or via the cloud settings button
-        let FIREBASE_URL = localStorage.getItem('padlet_firebase_url') || '';
+        const SERVER_FIREBASE_URL = 'https://darb-padlet-default-rtdb.firebaseio.com';
+        let FIREBASE_URL = SERVER_FIREBASE_URL;
         let posts = [];
         let currentFilter = 'all';
         let searchQuery = '';
         let uploadedImageDataUrl = null;
         let isSyncing = false;
 
-        const STORAGE_KEY = 'anti_bullying_padlet_posts_v6';
+        const STORAGE_KEY = 'anti_bullying_padlet_posts_v7';
 
         // Initialize
         async function init() {
