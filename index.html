@@ -250,10 +250,16 @@
                     </svg>
                 </button>
 
-                <!-- Cloud Server Sync Button -->
-                <button onclick="openCloudModal()" id="cloudStatusBtn" title="إعدادات الربط السحابي (Firebase)" class="px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50 transition flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                    <span id="cloudStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-                    <span id="cloudStatusText" class="hidden sm:inline">سيرفر المشاركات</span>
+                <!-- Admin Counselor Login Button -->
+                <button onclick="handleAdminToggle()" id="adminToggleBtn" title="تسجيل دخول الموجهة الطلابية للتحكم بالحذف" class="px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 transition flex items-center gap-1.5 text-xs font-bold">
+                    <span id="adminToggleIcon">🔒</span>
+                    <span id="adminToggleText">دخول الإدارة</span>
+                </button>
+
+                <!-- Cloud Server Sync Button (Hidden from normal students) -->
+                <button onclick="openCloudModal()" id="cloudStatusBtn" title="إعدادات الربط السحابي (Firebase)" class="hidden px-2.5 py-1.5 rounded-xl border border-slate-200 hover:border-purple-300 hover:bg-purple-50 transition items-center gap-1.5 text-xs font-bold text-slate-700">
+                    <span id="cloudStatusDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                    <span id="cloudStatusText" class="hidden sm:inline">السيرفر متصل 🟢</span>
                 </button>
             </div>
         </div>
@@ -458,6 +464,29 @@
         </div>
     </div>
 
+    <!-- Admin Passcode Modal -->
+    <div id="adminModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 sm:p-7 shadow-2xl border border-slate-100 text-right relative">
+            <button onclick="closeAdminModal()" class="absolute top-5 left-5 text-slate-400 hover:text-slate-600 w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 transition">✕</button>
+            <div class="mb-4">
+                <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full">إدارة اللوحة والمشاركات 👑</span>
+                <h3 class="text-xl font-black font-cairo text-slate-800 mt-2">تسجيل دخول المشرفة</h3>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">أدخلي الرمز السري الخاص بالموجهة الطلابية والإدارة للتحكم في حذف وإدارة المشاركات.</p>
+            </div>
+            <form onsubmit="verifyAdminPasscode(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">الرمز السري (Passcode)</label>
+                    <input type="password" id="adminPasscodeInput" required placeholder="أدخلي الرمز السري..." 
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-slate-50 text-center tracking-widest font-mono">
+                </div>
+                <button type="submit" class="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition text-sm flex items-center justify-center gap-2">
+                    <span>تأكيد الدخول</span>
+                    <span>🔓</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 mt-auto py-6 text-center text-xs sm:text-sm text-slate-500">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -491,7 +520,11 @@
             }
         ];
 
-        // Global State & Cloud Configuration
+        // Global State & Security Configuration
+        const ADMIN_PASSCODE = 'A123456';
+        let isAdmin = localStorage.getItem('is_padlet_admin') === 'true';
+
+        // Cloud Server Configuration
         const SERVER_FIREBASE_URL = 'https://darb-padlet-default-rtdb.firebaseio.com';
         let FIREBASE_URL = SERVER_FIREBASE_URL;
         let posts = [];
@@ -504,6 +537,7 @@
 
         // Initialize
         async function init() {
+            updateAdminUI();
             initCloudUI();
             await loadAllPosts();
             updateCategoryUI();
@@ -512,6 +546,64 @@
             // Start live real-time sync with server
             if (FIREBASE_URL) {
                 startRealtimeSync();
+            }
+        }
+
+        // Admin Passcode & Security Functions
+        function verifyAdminPasscode(e) {
+            e.preventDefault();
+            const input = document.getElementById('adminPasscodeInput').value.trim();
+            if (input === ADMIN_PASSCODE) {
+                isAdmin = true;
+                localStorage.setItem('is_padlet_admin', 'true');
+                closeAdminModal();
+                updateAdminUI();
+                renderPosts();
+                alert('أهلاً بكِ أستاذة عفاف 🌸\nتم تفعيل وضع المشرفة بنجاح! تظهر لكِ الآن صلاحيات حذف المشاركات.');
+            } else {
+                alert('الرمز السري غير صحيح! يرجى التأكد من الرمز والمحاولة مرة أخرى.');
+                document.getElementById('adminPasscodeInput').value = '';
+            }
+        }
+
+        function handleAdminToggle() {
+            if (isAdmin) {
+                if (confirm('هل ترغبين في تسجيل الخروج من وضع المشرفة وإخفاء أزرار الحذف؟')) {
+                    isAdmin = false;
+                    localStorage.removeItem('is_padlet_admin');
+                    updateAdminUI();
+                    renderPosts();
+                }
+            } else {
+                document.getElementById('adminPasscodeInput').value = '';
+                document.getElementById('adminModal').classList.remove('hidden');
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('adminModal').classList.add('hidden');
+        }
+
+        function updateAdminUI() {
+            const btn = document.getElementById('adminToggleBtn');
+            const icon = document.getElementById('adminToggleIcon');
+            const text = document.getElementById('adminToggleText');
+            const cloudBtn = document.getElementById('cloudStatusBtn');
+
+            if (isAdmin) {
+                if (btn) {
+                    btn.className = 'px-3 py-1.5 rounded-xl border border-emerald-500 bg-emerald-600 text-white shadow-sm hover:bg-emerald-700 transition flex items-center gap-1.5 text-xs font-bold';
+                }
+                if (icon) icon.textContent = '👑';
+                if (text) text.textContent = 'المشرفة (تسجيل خروج)';
+                if (cloudBtn) cloudBtn.classList.remove('hidden');
+            } else {
+                if (btn) {
+                    btn.className = 'px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 transition flex items-center gap-1.5 text-xs font-bold';
+                }
+                if (icon) icon.textContent = '🔒';
+                if (text) text.textContent = 'دخول الإدارة';
+                if (cloudBtn) cloudBtn.classList.add('hidden');
             }
         }
 
@@ -827,11 +919,12 @@
                             <span class="text-[11px] text-slate-400">${post.date || ''}</span>
                         </div>
 
-                        ${!post.isPinned ? `
-                            <button onclick="deletePost('${post.id}')" title="حذف المشاركة" class="text-slate-400 hover:text-red-500 transition p-1 hover:bg-white/50 rounded-lg">
+                        ${(!post.isPinned && isAdmin) ? `
+                            <button onclick="deletePost('${post.id}')" title="حذف المشاركة (صلاحية المشرفة)" class="text-rose-500 hover:text-rose-700 transition p-1 hover:bg-rose-50 rounded-lg flex items-center gap-1 font-bold text-[11px]">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
+                                <span class="text-[10px]">حذف</span>
                             </button>
                         ` : ''}
                     </div>
@@ -864,9 +957,13 @@
             }
         }
 
-        // Delete post
+        // Delete post (Restricted to Admin Counselor)
         function deletePost(id) {
-            if (confirm('هل أنتِ متأكدة من رغبتكِ في حذف هذه المشاركة نهائياً؟')) {
+            if (!isAdmin) {
+                alert('عذراً، صلاحية حذف المشاركات محصورة بالموجهة الطلابية وإدارة المدرسة فقط 🔒');
+                return;
+            }
+            if (confirm('هل أنتِ متأكدة من رغبتكِ في حذف هذه المشاركة نهائياً من السيرفر؟')) {
                 posts = posts.filter(p => p.id !== id);
                 saveToLocalStorage();
                 renderPosts();
