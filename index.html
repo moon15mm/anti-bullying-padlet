@@ -424,7 +424,7 @@
 
     <!-- Sound & Logic Script -->
     <script>
-        // Initial pre-loaded inspiring posts for the Counselor and sample students
+        // Initial welcome post from the counselor
         const DEFAULT_POSTS = [
             {
                 id: 'welcome-post',
@@ -434,61 +434,9 @@
                 title: 'الدرب الثانوية الأولى للبنات 🌷',
                 content: 'طالباتنا العزيزات، أرحّب بمشاركاتكنّ عبر رابط البادلت المرفق، بكلمة هادفة، أو رسمة معبّرة، أو عبارة توعوية عن مكافحة التنمر.\n\nلنملأ لوحتنا بأفكاركنّ وإبداعاتكنّ التي تنشر اللطف وتعزّز الاحترام 🤍',
                 color: 'bg-purple-100/90 border-purple-300',
-                likes: 52,
+                likes: 0,
                 isPinned: true,
                 date: 'إدارة المدرسة والتوجيه الطلابي',
-                image: null
-            },
-            {
-                id: 'post-1',
-                author: 'ريناد عبد العزيز',
-                grade: 'ثالث متوسط / 1',
-                category: 'quotes',
-                title: 'الكلمة الطيبة تبني قلباً',
-                content: 'التنمر يترك أثراً لا يُمحى بسهولة، لكن ابتسامتك وكلمتك الطيبة قادرة على إنقاذ يوم كامل لشخص آخر. لنكن مصدر أمان لزميلاتنا 🤝✨',
-                color: 'bg-pink-100/90 border-pink-200',
-                likes: 19,
-                isPinned: false,
-                date: 'منذ ساعتين',
-                image: null
-            },
-            {
-                id: 'post-2',
-                author: 'جود العتيبي',
-                grade: 'ثاني متوسط / 3',
-                category: 'drawings',
-                title: 'معاً نتكاتف ضد التنمر 🎨',
-                content: 'رسمت هذه اللوحة لأعبّر عن أن اختلافنا يجعلنا أجمل، والتنمر ليس قوة بل علامة ضعف.',
-                color: 'bg-sky-100/90 border-sky-200',
-                likes: 27,
-                isPinned: false,
-                date: 'منذ 3 ساعات',
-                image: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=600&auto=format&fit=crop&q=80'
-            },
-            {
-                id: 'post-3',
-                author: 'ليان فهد',
-                grade: 'أول ثانوي / 2',
-                category: 'words',
-                title: 'كن بطلاً ولا تكن متفرجاً',
-                content: 'إذا رأيتِ موقف تنمر في ساحة المدرسة أو في الممر، لا تصمتي.. قفي مع زميلتكِ أو أبلغي معلمتكِ وموجهتكِ الطلابية. صوتكِ شجاعة! 🕊️',
-                color: 'bg-emerald-100/90 border-emerald-200',
-                likes: 15,
-                isPinned: false,
-                date: 'منذ 4 ساعات',
-                image: null
-            },
-            {
-                id: 'post-4',
-                author: 'سديم الشمري',
-                grade: 'سادس ابتدائي',
-                category: 'quotes',
-                title: 'اللطف مجاني.. انشروه!',
-                content: 'ما أجمل أن نلتقي كل صباح بابتسامة ناصعة وكلمة سلام، شكراً للأستاذة عفاف على هذه المساحة الجميلة التي تجمع قلوبنا 🤍',
-                color: 'bg-amber-100/90 border-amber-200',
-                likes: 22,
-                isPinned: false,
-                date: 'اليوم',
                 image: null
             }
         ];
@@ -499,9 +447,10 @@
         let searchQuery = '';
         let uploadedImageDataUrl = null;
 
+        const STORAGE_KEY = 'anti_bullying_padlet_posts_v5';
+
         // Initialize
         function init() {
-            const STORAGE_KEY = 'anti_bullying_padlet_posts_v4';
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
                 try {
@@ -517,7 +466,7 @@
                     posts = DEFAULT_POSTS;
                 }
             } else {
-                posts = DEFAULT_POSTS;
+                posts = [...DEFAULT_POSTS];
             }
             savePosts();
             updateCategoryUI();
@@ -525,7 +474,7 @@
         }
 
         function savePosts() {
-            localStorage.setItem('anti_bullying_padlet_posts_v4', JSON.stringify(posts));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
         }
 
         // Web Audio gentle beep/pop sound
